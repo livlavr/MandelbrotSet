@@ -8,21 +8,24 @@
 
 double drawMandelbrotDefault(sf::Vertex* PixelsArray, ViewParameters* view_parameters) {
     int index = 0;
-    for(int window_x = 0; window_x < WINDOW_WIDTH; window_x++) {
-        for(int window_y = 0; window_y < WINDOW_HEIGHT; window_y++) {
-            // double real_x = (view_parameters->top_left_angle.x + ((double)window_x)/WINDOW_WIDTH  * REAL_WIDTH ) * view_parameters->scale + view_parameters->x_shift;
-            // double real_y = (view_parameters->top_left_angle.y - ((double)window_y)/WINDOW_HEIGHT * REAL_HEIGHT) * view_parameters->scale + view_parameters->y_shift;
-            // PixelsArray[index].color = getPixelColorDefault(real_x, real_y);
-            // PixelsArray[index].position = sf::Vector2f((double)window_x, (double)window_y);
-            // index++;
+    double center_x = 0.5 * REAL_WIDTH  + view_parameters->x_shift;
+    double center_y = 0.5 * REAL_HEIGHT + view_parameters->y_shift;
+    double scale = view_parameters->scale;
 
-            double real_x = (view_parameters->top_left_angle.x + ((double)window_x)/WINDOW_WIDTH  * REAL_WIDTH ) * view_parameters->scale + view_parameters->x_shift;
-            double real_y = (view_parameters->top_left_angle.y - ((double)window_y)/WINDOW_HEIGHT * REAL_HEIGHT) * view_parameters->scale + view_parameters->y_shift;
+    for (int window_x = 0; window_x < WINDOW_WIDTH; window_x++) {
+        for (int window_y = 0; window_y < WINDOW_HEIGHT; window_y++) {
+            double offset_x = ((double)window_x - WINDOW_WIDTH / 2.0) / WINDOW_WIDTH;
+            double offset_y = ((double)window_y - WINDOW_HEIGHT / 2.0) / WINDOW_HEIGHT;
+
+            double real_x = center_x + offset_x * REAL_WIDTH * scale;
+            double real_y = center_y + offset_y * REAL_HEIGHT * scale;
+
             PixelsArray[index].color = getPixelColorDefault(real_x, real_y);
             PixelsArray[index].position = sf::Vector2f((double)window_x, (double)window_y);
             index++;
         }
     }
+
     return 0;
 }
 

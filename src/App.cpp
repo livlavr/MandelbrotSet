@@ -30,13 +30,13 @@ void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, ViewParameters* v
                     window->close();
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::H) {
-                    view_parameters->x_shift -= MOVING_SPEED * REAL_WIDTH;
+                    view_parameters->x_shift -= MOVING_SPEED * REAL_WIDTH * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::L) {
-                    view_parameters->x_shift += MOVING_SPEED * REAL_WIDTH;
+                    view_parameters->x_shift += MOVING_SPEED * REAL_WIDTH * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::J) {
-                    view_parameters->y_shift -= MOVING_SPEED * REAL_HEIGHT;
+                    view_parameters->y_shift -= MOVING_SPEED * REAL_HEIGHT * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::K) {
-                    view_parameters->y_shift += MOVING_SPEED * REAL_HEIGHT;
+                    view_parameters->y_shift += MOVING_SPEED * REAL_HEIGHT * view_parameters->scale;
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::W) {
                     view_parameters->scale   -= SCALE_DEGREE * view_parameters->scale;
