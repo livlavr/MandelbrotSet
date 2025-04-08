@@ -33,3 +33,9 @@
 
 # build
 **/build
+
+# venv
+.vscode
+
+# Trash
+.DS_Store
