@@ -8,8 +8,8 @@
 
 double drawMandelbrotDefault(sf::Vertex* PixelsArray, ViewParameters* view_parameters) {
     int index = 0;
-    double center_x = 0.5 * REAL_WIDTH  + view_parameters->x_shift;
-    double center_y = 0.5 * REAL_HEIGHT + view_parameters->y_shift;
+    double center_x = view_parameters->top_left_angle.x + 0.5 * REAL_WIDTH  + view_parameters->x_shift;
+    double center_y = view_parameters->top_left_angle.y - 0.5 * REAL_HEIGHT + view_parameters->y_shift;
     double scale = view_parameters->scale;
 
     for (int window_x = 0; window_x < WINDOW_WIDTH; window_x++) {
