@@ -6,7 +6,7 @@
 #include "App.hpp"
 #include "Mandelbrot.hpp"
 
-void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, ViewParameters* view_parameters) {
+void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, WindowParameters* window_parameters, ViewParameters* view_parameters) {
     sf::Clock clock;
 
     sf::Font font("../common/Arial.ttf");
@@ -14,7 +14,7 @@ void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, ViewParameters* v
     text.setCharacterSize(24);
     text.setFillColor(sf::Color::Red);
     text.setStyle(sf::Text::Bold);
-    char* fps_string = (char*)calloc(15, sizeof(char));
+    char* fps_string = (char*)calloc(FPS_STRING_LEN, sizeof(char));
 
     // run the main loop
     while (window->isOpen()) {
@@ -30,18 +30,18 @@ void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, ViewParameters* v
                     window->close();
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::H) {
-                    view_parameters->x_shift -= MOVING_SPEED * REAL_WIDTH * view_parameters->scale;
+                    view_parameters->x_shift -= window_parameters->MOVING_SPEED * window_parameters->REAL_WIDTH * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::L) {
-                    view_parameters->x_shift += MOVING_SPEED * REAL_WIDTH * view_parameters->scale;
+                    view_parameters->x_shift += window_parameters->MOVING_SPEED * window_parameters->REAL_WIDTH * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::J) {
-                    view_parameters->y_shift -= MOVING_SPEED * REAL_HEIGHT * view_parameters->scale;
+                    view_parameters->y_shift -= window_parameters->MOVING_SPEED * window_parameters->REAL_HEIGHT * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::K) {
-                    view_parameters->y_shift += MOVING_SPEED * REAL_HEIGHT * view_parameters->scale;
+                    view_parameters->y_shift += window_parameters->MOVING_SPEED * window_parameters->REAL_HEIGHT * view_parameters->scale;
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::W) {
-                    view_parameters->scale   -= SCALE_DEGREE * view_parameters->scale;
+                    view_parameters->scale   -= window_parameters->SCALE_DEGREE * view_parameters->scale;
                 } else if (keyPressed->scancode == sf::Keyboard::Scancode::S) {
-                    view_parameters->scale   += SCALE_DEGREE * view_parameters->scale;
+                    view_parameters->scale   += window_parameters->SCALE_DEGREE * view_parameters->scale;
                 }
             }
 
@@ -54,7 +54,7 @@ void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, ViewParameters* v
         }
         // draw it
         window->clear();
-        drawMandelbrotDefault(PixelsArray, view_parameters);
+        drawMandelbrotDefault(PixelsArray, window_parameters, view_parameters);
 
         float current_time = clock.restart().asSeconds();
         float fps = 1.0f / current_time;
@@ -62,7 +62,7 @@ void appRun(sf::RenderWindow* window, sf::Vertex* PixelsArray, ViewParameters* v
         snprintf(fps_string, 15, "FPS: %1.f\n", fps);
         text.setString(fps_string);
 
-        window->draw(PixelsArray, WINDOW_SIZE, sf::PrimitiveType::Points);
+        window->draw(PixelsArray, window_parameters->WINDOW_SIZE, sf::PrimitiveType::Points);
         window->draw(text);
         window->display();
     }

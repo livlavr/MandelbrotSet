@@ -36,6 +36,7 @@
 
 # venv
 .vscode
+.idea
 
 # Trash
 .DS_Store

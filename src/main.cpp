@@ -5,17 +5,19 @@
 #include "App.hpp"
 #include "Mandelbrot.hpp"
 
-int main()
-{
+int main(){
 //set default window parameters
+WindowParameters window_parameters = {};
+
+//set default view parameters
 ViewParameters view_parameters = {};
 
 // create the window
-sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Mandelbrot Set");
+sf::RenderWindow window(sf::VideoMode({window_parameters.WINDOW_WIDTH, window_parameters.WINDOW_HEIGHT}), "Mandelbrot Set");
 
 // create a triangle strip
-sf::Vertex* PixelsArray = (sf::Vertex*)calloc(WINDOW_SIZE, sizeof(sf::Vertex));
+sf::Vertex* PixelsArray = (sf::Vertex*)calloc(window_parameters.WINDOW_SIZE, sizeof(sf::Vertex));
 
-appRun(&window, PixelsArray, &view_parameters);
+appRun(&window, PixelsArray, &window_parameters, &view_parameters);
 
 }
