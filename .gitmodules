@@ -1,0 +1,3 @@
+[submodule "Custom-asserts"]
+	path = Custom-asserts
+	url = git@github.com:livlavr/Custom-asserts.git
