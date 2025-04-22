@@ -8,21 +8,27 @@
 #include "Mandelbrot.hpp"
 
 int main(int argc, char** argv){
-    //set default window parameters
+    //Calloc context structures
     WindowParameters* window_parameters = (WindowParameters*)calloc(1, sizeof(WindowParameters));
-    //set default view parameters
-    Mandelbrot* mandelbrot = (Mandelbrot*)calloc(1, sizeof(Mandelbrot));
-    appCtr(window_parameters, mandelbrot);
+    Mandelbrot* mandelbrot_context = (Mandelbrot*)calloc(1, sizeof(Mandelbrot));
 
-//     parseFlags(argc, argv, &mandelbrot);
-//
-//     // create the window
-//     sf::RenderWindow window(sf::VideoMode({window_parameters->WINDOW_WIDTH, window_parameters->WINDOW_HEIGHT}), "Mandelbrot Set");
-//
-//     // create a triangle strip
-//     sf::Vertex* pixels_array = (sf::Vertex*)calloc(window_parameters.WINDOW_SIZE, sizeof(sf::Vertex));
-//
-//     if(mandelbrot)
-//     TestsRun(&window, pixels_array, &window_parameters, &mandelbrot);
-//     appRun(&window, pixels_array, &window_parameters, &mandelbrot);
+    //Set default context
+    windowCtr(window_parameters);
+    mandelbrotCtr(mandelbrot_context);
+
+    //Parse flags
+    parseFlags(argc, argv, mandelbrot_context);
+
+    // create the window
+    sf::RenderWindow window(sf::VideoMode({window_parameters->window_width, window_parameters->window_height}), "Mandelbrot Set");
+
+    // create a triangle strip
+    sf::Vertex* pixels_array = (sf::Vertex*)calloc(window_parameters->window_size, sizeof(sf::Vertex));
+
+    if(mandelbrot_context->test) {
+        // TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotDefault);
+        TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotOptimized);
+    } else {
+        appRun(&window, pixels_array, window_parameters, mandelbrot_context);
+    }
 }

@@ -26,8 +26,11 @@ target_compile_options (${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:${RELEASE_FL
 target_link_options (${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:${DEBUG_FLAGS}>)
 target_link_options (${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:${RELEASE_FLAGS}>)
 
-target_include_directories(${PROJECT_NAME} PUBLIC "inc/")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "[ Compiler Options ] $<JOIN:$<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_OPTIONS>,  >"
+)
 
+target_include_directories(${PROJECT_NAME} PUBLIC "inc/")
 
 include(FetchContent)
 FetchContent_Declare(SFML
