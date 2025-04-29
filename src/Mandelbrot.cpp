@@ -12,12 +12,13 @@
 ErrorType mandelbrotCtr(Mandelbrot* mandelbrot_context) {
     mandelbrot_context->top_left_angle.x = -2;
     mandelbrot_context->top_left_angle.y = 1;
-    mandelbrot_context->x_shift  = 0;
-    mandelbrot_context->y_shift  = 0;
-    mandelbrot_context->scale    = 1;
-    mandelbrot_context->runs     = RUNS_DEFAULT_VALUE;
-    mandelbrot_context->test     = TEST_DEFAULT_VALUE;
-    mandelbrot_context->graphics = GRAPHICS_DEFAULT_VALUE;
+    mandelbrot_context->x_shift          = 0;
+    mandelbrot_context->y_shift          = 0;
+    mandelbrot_context->scale            = 1;
+    mandelbrot_context->graphics         = GRAPHICS_DEFAULT_VALUE;
+    mandelbrot_context->runs             = RUNS_DEFAULT_VALUE;
+    mandelbrot_context->test             = TEST_DEFAULT_VALUE;
+    mandelbrot_context->render_function  = RENDER_FUNCTION_DEFAULT_VALUE;
 
     return SUCCESS;
 }

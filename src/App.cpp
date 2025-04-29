@@ -70,9 +70,7 @@ ErrorType appRun(sf::RenderWindow* window, sf::Vertex* pixels_array, const Windo
         // draw it
         window->clear();
 
-        // renderMandelbrotDefault(pixels_array, window_parameters, mandelbrot_context);
-        renderMandelbrotOptimized(pixels_array, window_parameters, mandelbrot_context);
-        // renderMandelbrotArmNeon(pixels_array, window_parameters, mandelbrot_context);
+        RENDER_FUNCTION(pixels_array, window_parameters, mandelbrot_context);
 
         float current_time = clock.restart().asSeconds();
         float fps = 1.0f / current_time;
@@ -84,73 +82,6 @@ ErrorType appRun(sf::RenderWindow* window, sf::Vertex* pixels_array, const Windo
         window->draw(text);
         window->display();
     }
-
-    return SUCCESS;
-}
-
-ErrorType parseFlags(int argc, char** argv, Mandelbrot* mandelbrot_context) {
-    warning(mandelbrot_context, NULL_PTR_ERROR);
-    warning(argv,       NULL_PTR_ERROR);
-
-    const char* short_options = "r::t:";
-
-    const struct option long_options[] = {
-        {"graphics",    no_argument, &(mandelbrot_context->graphics), YES},
-        {"no-graphics", no_argument, &(mandelbrot_context->graphics), NO},
-        {"runs",        optional_argument, NULL, 'r'},
-        {"test",        required_argument, NULL, 't'},
-        {"native",      required_argument, NULL, 'n'},
-        {"optimized",   required_argument, NULL, 'o'},
-        {"simd",        required_argument, NULL, 's'},
-        {NULL, 0, NULL, 0}
-    };
-
-    int rez = 0;
-
-	while((rez = getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
-        switch(rez) {
-            case 'r':
-                if(optarg != NULL) {
-                    mandelbrot_context->runs = atoi(optarg);
-                } else {
-                    mandelbrot_context->runs = RUNS_DEFAULT_VALUE;
-                }
-                break;
-            case 't':
-                if(optarg != NULL) {
-                    mandelbrot_context->test = atoi(optarg);
-                } else {
-                    mandelbrot_context->test = TEST_DEFAULT_VALUE;
-                }
-                break;
-            case 'n':
-                if(optarg != NULL) {
-                    mandelbrot_context->test = atoi(optarg);
-                } else {
-                    mandelbrot_context->test = TEST_DEFAULT_VALUE;
-                }
-                break;
-            case 'o':
-                if(optarg != NULL) {
-                    mandelbrot_context->test = atoi(optarg);
-                } else {
-                    mandelbrot_context->test = TEST_DEFAULT_VALUE;
-                }
-                break;
-            case 's':
-                if(optarg != NULL) {
-                    mandelbrot_context->test = atoi(optarg);
-                } else {
-                    mandelbrot_context->test = TEST_DEFAULT_VALUE;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    color_printf(GREEN_COLOR, REGULAR, "[ TEST = %d ]\n", mandelbrot_context->test);
-    color_printf(GREEN_COLOR, REGULAR, "[ RUNS = %d ]\n", mandelbrot_context->runs);
 
     return SUCCESS;
 }

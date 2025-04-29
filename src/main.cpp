@@ -26,9 +26,7 @@ int main(int argc, char** argv){
     sf::Vertex* pixels_array = (sf::Vertex*)calloc(window_parameters->window_size, sizeof(sf::Vertex));
 
     if(mandelbrot_context->test) {
-        // TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotDefault);
-        // TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotOptimized);
-        TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotArmNeon);
+        TestsRun(&window, pixels_array, window_parameters, mandelbrot_context);
     } else {
         appRun(&window, pixels_array, window_parameters, mandelbrot_context);
     }
