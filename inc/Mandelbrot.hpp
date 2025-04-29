@@ -10,7 +10,7 @@
 static const double MAX_RADIUS                = 3.0;
 static const int    MAX_ITERATIONS_COUNT      = 256;
 static const int    UNROLL_LEVEL              = 2;
-static const int    ARM_NEON_ITERATIONS_COUNT = 2; // Don't change
+static const int    ARM_NEON_ITERATIONS_COUNT = 2; // Don't change!
 
 //=================================================================//
 //============================FUNCTIONS============================//

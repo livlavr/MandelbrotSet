@@ -71,9 +71,8 @@ ErrorType appRun(sf::RenderWindow* window, sf::Vertex* pixels_array, const Windo
         window->clear();
 
         // renderMandelbrotDefault(pixels_array, window_parameters, mandelbrot_context);
-        // renderMandelbrotOptimized(pixels_array, window_parameters, mandelbrot_context);
-        renderMandelbrotArmNeon(pixels_array, window_parameters, mandelbrot_context);
-
+        renderMandelbrotOptimized(pixels_array, window_parameters, mandelbrot_context);
+        // renderMandelbrotArmNeon(pixels_array, window_parameters, mandelbrot_context);
 
         float current_time = clock.restart().asSeconds();
         float fps = 1.0f / current_time;

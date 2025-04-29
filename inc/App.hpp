@@ -11,7 +11,8 @@ static const int   FPS_STRING_LEN = 15;
 static const int   FONT_SIZE      = 24;
 static const char* FONT_PATH      = "../Common/Arial.ttf";
 
-static const int GRAPHICS_DEFAULT_VALUE = 1;   //Flags default values
+//Flags default values:
+static const int GRAPHICS_DEFAULT_VALUE = 1;
 static const int RUNS_DEFAULT_VALUE     = 1;
 static const int TEST_DEFAULT_VALUE     = 0;
 
@@ -19,6 +20,7 @@ static const int TEST_DEFAULT_VALUE     = 0;
 static const int YES = 1;
 static const int NO  = 0;
 
+//Window default values:
 static const double WINDOW_WIDTH  = 1000;
 static const double WINDOW_HEIGHT = 800;
 static const double WINDOW_SIZE   = WINDOW_WIDTH * WINDOW_HEIGHT;
@@ -56,13 +58,13 @@ struct Mandelbrot {
     int    graphics = 0;
 };
 
-//=================================================t================//
+//=================================================================//
 //============================FUNCTIONS============================//
 //=================================================================//
 
 typedef ErrorType (renderFunction) (sf::Vertex*, const WindowParameters*, Mandelbrot*);
 
-ErrorType parseFlags    (int argc, char** argv, Mandelbrot* mandelbrot_context);
-ErrorType windowCtr     (WindowParameters* window_parameters);
-ErrorType appRun        (sf::RenderWindow* window, sf::Vertex* pixels_array, const WindowParameters* window_parameters, Mandelbrot* mandelbrot_context);
+ErrorType parseFlags(int argc, char** argv, Mandelbrot* mandelbrot_context);
+ErrorType windowCtr (WindowParameters* window_parameters);
+ErrorType appRun    (sf::RenderWindow* window, sf::Vertex* pixels_array, const WindowParameters* window_parameters, Mandelbrot* mandelbrot_context);
 #endif

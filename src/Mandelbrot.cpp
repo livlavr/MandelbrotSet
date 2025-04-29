@@ -148,7 +148,7 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
 
 ErrorType getPixelColorOptimized(double* x_coords, double* y_coords, sf::Color* colors) {
     int  radius_vector_test = 1;
-    bool continue_color_rendering = true;
+    bool continue_rendering = true;
     alignas(16) int counter[UNROLL_LEVEL] = {};
     alignas(16) double radius_vector_x_coords[UNROLL_LEVEL] = {};
     alignas(16) double radius_vector_y_coords[UNROLL_LEVEL] = {};
@@ -164,7 +164,7 @@ ErrorType getPixelColorOptimized(double* x_coords, double* y_coords, sf::Color* 
         radius_vector_y_coords[i] = y_coords[i];
     }
 
-    while(radius_vector_test != 0 && continue_color_rendering) {
+    while(radius_vector_test != 0 && continue_rendering) {
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             xn[i] = radius_vector_x_coords[i];
         }
@@ -207,10 +207,10 @@ ErrorType getPixelColorOptimized(double* x_coords, double* y_coords, sf::Color* 
             }
         }
 
-        continue_color_rendering = false;
+        continue_rendering = false;
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             if(counter[i] < MAX_ITERATIONS_COUNT && radius_vector_cmps[i] != 0) {
-                continue_color_rendering = true;
+                continue_rendering = true;
             }
         }
 
@@ -276,10 +276,7 @@ ErrorType renderMandelbrotArmNeon(sf::Vertex* pixels_array, const WindowParamete
             y_coords = vmulq_f64(y_coords, scaled_real_height_v);
             y_coords = vaddq_f64(y_coords, center_y_v);
 
-            // getPixelColorArmNeon(&x_coords, &y_coords, colors);
-            vst1q_f64(x_coords_array, x_coords);
-            vst1q_f64(y_coords_array, y_coords);
-            getPixelColorOptimized(x_coords_array, y_coords_array, colors);
+            getPixelColorArmNeon(&x_coords, &y_coords, colors);
             for(size_t i = 0; i < ARM_NEON_ITERATIONS_COUNT; i++) {
                 pixels_array[point_index + i].color = colors[i];
             }
@@ -296,10 +293,10 @@ ErrorType renderMandelbrotArmNeon(sf::Vertex* pixels_array, const WindowParamete
 
 ErrorType getPixelColorArmNeon(float64x2_t* x_coords_ptr, float64x2_t* y_coords_ptr, sf::Color* colors) {
     uint64_t radius_vector_test = 1;
-    uint64_t continue_color_rendering = 1;
+    uint64_t continue_rendering = 1;
 
-    alignas(16) uint64_t counter[2] = {};
-    alignas(16) uint64_t radius_vector_cmps[2] = {};
+    uint64_t counter[2] = {};
+    uint64_t radius_vector_cmps[2] = {};
 
     alignas(16) float64x2_t xn  = {};
     alignas(16) float64x2_t yn  = {};
@@ -313,10 +310,10 @@ ErrorType getPixelColorArmNeon(float64x2_t* x_coords_ptr, float64x2_t* y_coords_
     alignas(16) uint64x2_t  iteration_mask_v       = {};
     alignas(16) uint64x2_t  combined_mask          = {};
     alignas(16) float64x2_t two_const_v            = vmovq_n_f64(2.0);
-    alignas(16) uint64x2_t  max_radius_v           = vmovq_n_f64(MAX_RADIUS);
+    alignas(16) float64x2_t max_radius_v           = vmovq_n_f64(MAX_RADIUS);
     alignas(16) uint64x2_t  max_iterations_count_v = vmovq_n_u64(MAX_ITERATIONS_COUNT);
 
-    while(continue_color_rendering) {
+    while(continue_rendering) {
         xn = radius_vector_x_coords;
         yn = radius_vector_y_coords;
 
@@ -329,14 +326,15 @@ ErrorType getPixelColorArmNeon(float64x2_t* x_coords_ptr, float64x2_t* y_coords_
 
         radius_vector_length_v = vmulq_f64(radius_vector_x_coords, radius_vector_x_coords);
         radius_vector_length_v = vaddq_f64(radius_vector_length_v, vmulq_f64(radius_vector_y_coords, radius_vector_y_coords));
-        radius_vector_length_v = vsqrtq_f64(radius_vector_length_v);
 
-        length_mask_v = vcltq_f64(radius_vector_length_v, max_radius_v);         // cmp_mask[i] = radius_vector_length[i] < MAX_RADIUS
-        counter_v = vaddq_u64(counter_v, length_mask_v);                         // counter[i] = counter[i] + cmp_mask[i] ~ if(radius_vector_length[i] < MAX_RADIUS) { counter[i]++ }
+        length_mask_v          = vcltq_f64(vsqrtq_f64(radius_vector_length_v), max_radius_v); // cmp_mask[i] = sqrt(radius_vector_length[i]) < MAX_RADIUS
+        length_mask_v          = vshrq_n_u64(length_mask_v, 63);
+        counter_v              = vaddq_u64(counter_v, length_mask_v);                         // counter[i] = counter[i] + cmp_mask[i] ~ if(radius_vector_length[i] < MAX_RADIUS) { counter[i]++ }
 
-        iteration_mask_v         = vcltq_u64(counter_v, max_iterations_count_v); // counter[i] < MAX_ITERATIONS_COUNT
-        combined_mask            = vandq_u64(iteration_mask_v, length_mask_v);   // bitwise and
-        continue_color_rendering = vaddvq_u64(combined_mask);                    // continue_color_rendering = SUM(combined_mask[i]) (if(all combined_mask[i] equal to zero): continue_color_rendering = false)
+        iteration_mask_v       = vcltq_u64(counter_v, max_iterations_count_v);                // counter[i] < MAX_ITERATIONS_COUNT
+        iteration_mask_v       = vshrq_n_u64(iteration_mask_v, 63);
+        combined_mask          = vandq_u64(iteration_mask_v, length_mask_v);                  // bitwise AND
+        continue_rendering     = vaddvq_u64(combined_mask);                                   // continue_rendering = SUM(combined_mask[i]) (if(all combined_mask[i] equal to zero): continue_rendering = false)
     }
 
     vst1q_u64((uint64_t*)counter, counter_v);
