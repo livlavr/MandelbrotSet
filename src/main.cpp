@@ -27,7 +27,8 @@ int main(int argc, char** argv){
 
     if(mandelbrot_context->test) {
         // TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotDefault);
-        TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotOptimized);
+        // TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotOptimized);
+        TestsRun(&window, pixels_array, window_parameters, mandelbrot_context, renderMandelbrotArmNeon);
     } else {
         appRun(&window, pixels_array, window_parameters, mandelbrot_context);
     }

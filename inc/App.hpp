@@ -16,8 +16,8 @@ static const int RUNS_DEFAULT_VALUE     = 1;
 static const int TEST_DEFAULT_VALUE     = 0;
 
 
-static const int YES                    = 1;
-static const int NO                     = 0;
+static const int YES = 1;
+static const int NO  = 0;
 
 static const double WINDOW_WIDTH  = 1000;
 static const double WINDOW_HEIGHT = 800;

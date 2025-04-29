@@ -1,5 +1,6 @@
 #include <cmath>
 #include <time.h>
+#include <stdalign.h>
 #include <SFML/Graphics.hpp>
 
 #include "custom_asserts.h"
@@ -9,7 +10,6 @@
 #include "ErrorTypes.hpp"
 
 ErrorType mandelbrotCtr(Mandelbrot* mandelbrot_context) {
-
     mandelbrot_context->top_left_angle.x = -2;
     mandelbrot_context->top_left_angle.y = 1;
     mandelbrot_context->x_shift  = 0;
@@ -89,10 +89,10 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
     double half_height = WINDOW_HEIGHT / 2.0;
     double half_width  = WINDOW_WIDTH  / 2.0;
 
-    Coordinates* result_coords = (Coordinates*)calloc(WINDOW_SIZE, sizeof(double));
-    Coordinates  coords[UNROLL_LEVEL] = {};
-    sf::Vector2f position   [UNROLL_LEVEL] = {};
-    sf::Color    colors     [UNROLL_LEVEL] = {};
+    alignas(16) double       x_coords   [UNROLL_LEVEL] = {};
+    alignas(16) double       y_coords   [UNROLL_LEVEL] = {};
+    alignas(16) sf::Vector2f position   [UNROLL_LEVEL] = {};
+    alignas(16) sf::Color    colors     [UNROLL_LEVEL] = {};
 
     size_t window_x = 0;
     size_t window_y = 0;
@@ -100,45 +100,38 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
     for (window_x = 0; window_x < (size_t)WINDOW_WIDTH; window_x++) {
         for (window_y = 0; window_y < (size_t)WINDOW_HEIGHT; window_y += UNROLL_LEVEL) {
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].x = (double)window_x;
+                x_coords[i] = (double)window_x;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].x -= half_width;
+                x_coords[i] -= half_width;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].x /= WINDOW_WIDTH;
+                x_coords[i] /= WINDOW_WIDTH;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].x *= REAL_WIDTH * scale;
+                x_coords[i] *= REAL_WIDTH * scale;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].x += center_x;
+                x_coords[i] += center_x;
             }
 
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].y = (double)(window_y + i);
+                y_coords[i] = (double)(window_y + i);
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].y -= half_height;
+                y_coords[i] -= half_height;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].y /= WINDOW_HEIGHT;
+                y_coords[i] /= WINDOW_HEIGHT;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].y *= REAL_HEIGHT * scale;
+                y_coords[i] *= REAL_HEIGHT * scale;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                coords[i].y += center_y;
+                y_coords[i] += center_y;
             }
 
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                result_coords[point_index + i].x = coords[i].x;
-            }
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                result_coords[point_index + i].y = coords[i].y;
-            }
-
-            getPixelColorOptimized(coords, colors);
+            getPixelColorOptimized(x_coords, y_coords, colors);
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
                 pixels_array[point_index + i].color = colors[i];
             }
@@ -150,58 +143,57 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
         }
     }
 
-    FREE(result_coords);
-
     return SUCCESS;
 }
 
-ErrorType getPixelColorOptimized(Coordinates* coords, sf::Color* colors) {
-    int counter[UNROLL_LEVEL] = {};
-    int radius_vector_test = 1;
-    Coordinates radius_vector_coords[UNROLL_LEVEL] = {};
-    double xn[UNROLL_LEVEL] = {};
-    double yn[UNROLL_LEVEL] = {};
-    double radius_vector_length[UNROLL_LEVEL] = {};
-    int    radius_vector_cmps[UNROLL_LEVEL] = {};
-    bool   continue_color_rendering = true;
+ErrorType getPixelColorOptimized(double* x_coords, double* y_coords, sf::Color* colors) {
+    int  radius_vector_test = 1;
+    bool continue_color_rendering = true;
+    alignas(16) int counter[UNROLL_LEVEL] = {};
+    alignas(16) double radius_vector_x_coords[UNROLL_LEVEL] = {};
+    alignas(16) double radius_vector_y_coords[UNROLL_LEVEL] = {};
+    alignas(16) double xn[UNROLL_LEVEL] = {};
+    alignas(16) double yn[UNROLL_LEVEL] = {};
+    alignas(16) double radius_vector_length[UNROLL_LEVEL] = {};
+    alignas(16) int    radius_vector_cmps[UNROLL_LEVEL] = {};
 
     for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-        radius_vector_coords[i].x = coords[i].x;
+        radius_vector_x_coords[i] = x_coords[i];
     }
     for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-        radius_vector_coords[i].y = coords[i].y;
+        radius_vector_y_coords[i] = y_coords[i];
     }
 
     while(radius_vector_test != 0 && continue_color_rendering) {
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            xn[i] = radius_vector_coords[i].x;
+            xn[i] = radius_vector_x_coords[i];
         }
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            yn[i] = radius_vector_coords[i].y;
-        }
-
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_coords[i].x = xn[i] * xn[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_coords[i].x -= yn[i] * yn[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_coords[i].x += coords[i].x;
+            yn[i] = radius_vector_y_coords[i];
         }
 
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_coords[i].y = 2 * xn[i] * yn[i];
+            radius_vector_x_coords[i] = xn[i] * xn[i];
         }
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_coords[i].y += coords[i].y;
+            radius_vector_x_coords[i] -= yn[i] * yn[i];
+        }
+        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            radius_vector_x_coords[i] += x_coords[i];
         }
 
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_length[i] = radius_vector_coords[i].x * radius_vector_coords[i].x;
+            radius_vector_y_coords[i] = 2 * xn[i] * yn[i];
         }
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_length[i] += radius_vector_coords[i].y * radius_vector_coords[i].y;
+            radius_vector_y_coords[i] += y_coords[i];
+        }
+
+        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            radius_vector_length[i] = radius_vector_x_coords[i] * radius_vector_x_coords[i];
+        }
+        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            radius_vector_length[i] += radius_vector_y_coords[i] * radius_vector_y_coords[i];
         }
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             radius_vector_cmps[i] = (sqrt(radius_vector_length[i]) < MAX_RADIUS);
@@ -225,6 +217,132 @@ ErrorType getPixelColorOptimized(Coordinates* coords, sf::Color* colors) {
     }
 
     for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+        if(radius_vector_cmps[i] == 0) {
+            uint8_t r = (8 * counter[i]) % 255;
+            uint8_t g = (1 * counter[i]) % 255;
+            uint8_t b = (4 * counter[i]) % 255;
+
+            colors[i] = {r, g, b, 255};
+        } else {
+            colors[i] = sf::Color::Black;
+        }
+    }
+
+    return SUCCESS;
+}
+
+ErrorType renderMandelbrotArmNeon(sf::Vertex* pixels_array, const WindowParameters* window_parameters, Mandelbrot* mandelbrot_context) {
+    size_t point_index = 0;
+    int    points_render_flag = 0;
+
+    double* x_coords_array = (double*)calloc(2, sizeof(double));
+    double* y_coords_array = (double*)calloc(2, sizeof(double));
+
+    double center_x    = mandelbrot_context->top_left_angle.x + 0.5 * REAL_WIDTH  + mandelbrot_context->x_shift;
+    double center_y    = mandelbrot_context->top_left_angle.y - 0.5 * REAL_HEIGHT + mandelbrot_context->y_shift;
+    double scale       = mandelbrot_context->scale;
+    alignas(16) float64x2_t scaled_real_width_v  = vmovq_n_f64((float64_t)(REAL_WIDTH * scale));
+    alignas(16) float64x2_t scaled_real_height_v = vmovq_n_f64((float64_t)(REAL_HEIGHT * scale));
+    alignas(16) float64x2_t window_width_v       = vmovq_n_f64((float64_t)WINDOW_WIDTH);
+    alignas(16) float64x2_t window_height_v      = vmovq_n_f64((float64_t)WINDOW_HEIGHT);
+    alignas(16) float64x2_t center_x_v           = vmovq_n_f64((float64_t)center_x);
+    alignas(16) float64x2_t center_y_v           = vmovq_n_f64((float64_t)center_y);
+    alignas(16) float64x2_t half_width_v         = vmovq_n_f64((float64_t)(WINDOW_WIDTH  / 2.0));
+    alignas(16) float64x2_t half_height_v        = vmovq_n_f64((float64_t)(WINDOW_HEIGHT / 2.0));
+
+    alignas(16) float64x2_t x_coords = {};
+    alignas(16) float64x2_t y_coords = {};
+    alignas(16) sf::Vector2f position   [ARM_NEON_ITERATIONS_COUNT] = {};
+    alignas(16) sf::Color    colors     [ARM_NEON_ITERATIONS_COUNT] = {};
+
+    size_t window_x = 0;
+    size_t window_y = 0;
+
+    for (window_x = 0; window_x < (size_t)WINDOW_WIDTH; window_x++) {
+        for (window_y = 0; window_y < (size_t)WINDOW_HEIGHT; window_y += ARM_NEON_ITERATIONS_COUNT) {
+            x_coords = vmovq_n_f64((float64_t)window_x);
+            x_coords = vsubq_f64(x_coords, half_width_v);
+
+            x_coords = vdivq_f64(x_coords, window_width_v);
+
+            x_coords = vmulq_f64(x_coords, scaled_real_width_v);
+            x_coords = vaddq_f64(x_coords, center_x_v);
+
+            y_coords = vsetq_lane_f64((float64_t)(window_y), y_coords, 0);
+            y_coords = vsetq_lane_f64((float64_t)(window_y + 1), y_coords, 1);
+
+            y_coords = vsubq_f64(y_coords, half_height_v);
+            y_coords = vdivq_f64(y_coords, window_height_v);
+            y_coords = vmulq_f64(y_coords, scaled_real_height_v);
+            y_coords = vaddq_f64(y_coords, center_y_v);
+
+            // getPixelColorArmNeon(&x_coords, &y_coords, colors);
+            vst1q_f64(x_coords_array, x_coords);
+            vst1q_f64(y_coords_array, y_coords);
+            getPixelColorOptimized(x_coords_array, y_coords_array, colors);
+            for(size_t i = 0; i < ARM_NEON_ITERATIONS_COUNT; i++) {
+                pixels_array[point_index + i].color = colors[i];
+            }
+            for(size_t i = 0; i < ARM_NEON_ITERATIONS_COUNT; i++) {
+                pixels_array[point_index + i].position = sf::Vector2f((double)window_x, (double)(window_y + i));
+            }
+
+            point_index += ARM_NEON_ITERATIONS_COUNT;
+        }
+    }
+
+    return SUCCESS;
+}
+
+ErrorType getPixelColorArmNeon(float64x2_t* x_coords_ptr, float64x2_t* y_coords_ptr, sf::Color* colors) {
+    uint64_t radius_vector_test = 1;
+    uint64_t continue_color_rendering = 1;
+
+    alignas(16) uint64_t counter[2] = {};
+    alignas(16) uint64_t radius_vector_cmps[2] = {};
+
+    alignas(16) float64x2_t xn  = {};
+    alignas(16) float64x2_t yn  = {};
+    alignas(16) float64x2_t x_coords = *x_coords_ptr;
+    alignas(16) float64x2_t y_coords = *y_coords_ptr;
+    alignas(16) float64x2_t radius_vector_x_coords = *x_coords_ptr;
+    alignas(16) float64x2_t radius_vector_y_coords = *y_coords_ptr;
+    alignas(16) float64x2_t radius_vector_length_v = {};
+    alignas(16) uint64x2_t  counter_v              = {};
+    alignas(16) uint64x2_t  length_mask_v          = {};
+    alignas(16) uint64x2_t  iteration_mask_v       = {};
+    alignas(16) uint64x2_t  combined_mask          = {};
+    alignas(16) float64x2_t two_const_v            = vmovq_n_f64(2.0);
+    alignas(16) uint64x2_t  max_radius_v           = vmovq_n_f64(MAX_RADIUS);
+    alignas(16) uint64x2_t  max_iterations_count_v = vmovq_n_u64(MAX_ITERATIONS_COUNT);
+
+    while(continue_color_rendering) {
+        xn = radius_vector_x_coords;
+        yn = radius_vector_y_coords;
+
+        radius_vector_x_coords = vmulq_f64(xn, xn);
+        radius_vector_x_coords = vsubq_f64(radius_vector_x_coords, vmulq_f64(yn, yn));
+        radius_vector_x_coords = vaddq_f64(radius_vector_x_coords, x_coords);
+
+        radius_vector_y_coords = vmulq_f64(two_const_v, vmulq_f64(xn, yn));
+        radius_vector_y_coords = vaddq_f64(radius_vector_y_coords, y_coords);
+
+        radius_vector_length_v = vmulq_f64(radius_vector_x_coords, radius_vector_x_coords);
+        radius_vector_length_v = vaddq_f64(radius_vector_length_v, vmulq_f64(radius_vector_y_coords, radius_vector_y_coords));
+        radius_vector_length_v = vsqrtq_f64(radius_vector_length_v);
+
+        length_mask_v = vcltq_f64(radius_vector_length_v, max_radius_v);         // cmp_mask[i] = radius_vector_length[i] < MAX_RADIUS
+        counter_v = vaddq_u64(counter_v, length_mask_v);                         // counter[i] = counter[i] + cmp_mask[i] ~ if(radius_vector_length[i] < MAX_RADIUS) { counter[i]++ }
+
+        iteration_mask_v         = vcltq_u64(counter_v, max_iterations_count_v); // counter[i] < MAX_ITERATIONS_COUNT
+        combined_mask            = vandq_u64(iteration_mask_v, length_mask_v);   // bitwise and
+        continue_color_rendering = vaddvq_u64(combined_mask);                    // continue_color_rendering = SUM(combined_mask[i]) (if(all combined_mask[i] equal to zero): continue_color_rendering = false)
+    }
+
+    vst1q_u64((uint64_t*)counter, counter_v);
+    vst1q_u64((uint64_t*)radius_vector_cmps, length_mask_v);
+
+    for(size_t i = 0; i < ARM_NEON_ITERATIONS_COUNT; i++) {
         if(radius_vector_cmps[i] == 0) {
             uint8_t r = (8 * counter[i]) % 255;
             uint8_t g = (1 * counter[i]) % 255;
