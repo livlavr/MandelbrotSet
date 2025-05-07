@@ -39,11 +39,11 @@ message(STATUS "CXX Debug Flags: ${DEBUG_FLAGS}")
 message(STATUS "CXX Release Flags: ${RELEASE_FLAGS}")
 
 # Ask powerful Maksonchik about it
-if(DEFINED ENV{UNROLL_LEVEL})
-    set(UNROLL_LEVEL $ENV{UNROLL_LEVEL})
-else()
-    set(UNROLL_LEVEL 16)
-endif()
+# if(DEFINED ENV{UNROLL_LEVEL})
+#     set(UNROLL_LEVEL $ENV{UNROLL_LEVEL})
+# else()
+#     set(UNROLL_LEVEL 2)
+# endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     UNROLL_LEVEL=${UNROLL_LEVEL}

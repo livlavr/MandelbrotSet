@@ -23,10 +23,10 @@ static const int NATIVE = 0;
 static const int UNROLL = 1;
 static const int SIMD   = 2;
 
-//Define needs to pass this variable from enviroment
+//Define needs to pass this variable from environment
 static const double MAX_RADIUS                 = 3.0;
 static const int    MAX_ITERATIONS_COUNT       = 256;
-static const int    ARM_NEON_ITERATIONS_COUNT  = 2; //Don't change, it'll kill you!
+static const int    ARM_NEON_ITERATIONS_COUNT  = 2;   //Don't change, it'll kill you!
 
 struct Coordinates {
     double x = 0;
@@ -59,8 +59,8 @@ ErrorType getPixelColorOptimized   (double* x_coords, double* y_coords, sf::Colo
 ErrorType getPixelColorArmNeon     (float64x2_t* x_coords_ptr, float64x2_t* y_coords_ptr, sf::Color* colors);
 
 typedef ErrorType (*renderFunction) (sf::Vertex*, const WindowParameters*, Mandelbrot*);
-static renderFunction render_funciton_type[3] = {renderMandelbrotDefault, renderMandelbrotOptimized, renderMandelbrotArmNeon};
+static renderFunction render_function_type[3] = {renderMandelbrotDefault, renderMandelbrotOptimized, renderMandelbrotArmNeon};
 
-#define RENDER_FUNCTION render_funciton_type[mandelbrot_context->render_function]
+#define RENDER_FUNCTION render_function_type[mandelbrot_context->render_function]
 
 #endif

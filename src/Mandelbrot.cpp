@@ -9,6 +9,10 @@
 #include "Tests.hpp"
 #include "ErrorTypes.hpp"
 
+#ifndef UNROLL_LEVEL
+    #define UNROLL_LEVEL 16
+#endif
+
 ErrorType mandelbrotCtr(Mandelbrot* mandelbrot_context) {
     mandelbrot_context->top_left_angle.x = -2;
     mandelbrot_context->top_left_angle.y = 1;
@@ -90,10 +94,10 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
     double half_height = WINDOW_HEIGHT / 2.0;
     double half_width  = WINDOW_WIDTH  / 2.0;
 
-    alignas(16) double       x_coords   [UNROLL_LEVEL] = {};
-    alignas(16) double       y_coords   [UNROLL_LEVEL] = {};
-    alignas(16) sf::Vector2f position   [UNROLL_LEVEL] = {};
-    alignas(16) sf::Color    colors     [UNROLL_LEVEL] = {};
+    alignas(16) double       x_coords[UNROLL_LEVEL] = {};
+    alignas(16) double       y_coords[UNROLL_LEVEL] = {};
+    alignas(16) sf::Vector2f position[UNROLL_LEVEL] = {};
+    alignas(16) sf::Color    colors  [UNROLL_LEVEL] = {};
 
     size_t window_x = 0;
     size_t window_y = 0;
@@ -102,35 +106,40 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
         for (window_y = 0; window_y < (size_t)WINDOW_HEIGHT; window_y += UNROLL_LEVEL) {
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
                 x_coords[i] = (double)window_x;
-            }
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                x_coords[i] -= half_width;
-            }
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                x_coords[i] /= WINDOW_WIDTH;
-            }
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                x_coords[i] *= REAL_WIDTH * scale;
-            }
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-                x_coords[i] += center_x;
-            }
-
-            for(size_t i = 0; i < UNROLL_LEVEL; i++) {
                 y_coords[i] = (double)(window_y + i);
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+                x_coords[i] -= half_width;
                 y_coords[i] -= half_height;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+                x_coords[i] /= WINDOW_WIDTH;
                 y_coords[i] /= WINDOW_HEIGHT;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+                x_coords[i] *= REAL_WIDTH * scale;
                 y_coords[i] *= REAL_HEIGHT * scale;
             }
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+                x_coords[i] += center_x;
                 y_coords[i] += center_y;
             }
+
+            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            //     y_coords[i] = (double)(window_y + i);
+            // }
+            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            //     y_coords[i] -= half_height;
+            // }
+            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            //     y_coords[i] /= WINDOW_HEIGHT;
+            // }
+            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            //     y_coords[i] *= REAL_HEIGHT * scale;
+            // }
+            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
+            //     y_coords[i] += center_y;
+            // }
 
             getPixelColorOptimized(x_coords, y_coords, colors);
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {
@@ -278,6 +287,11 @@ ErrorType renderMandelbrotArmNeon(sf::Vertex* pixels_array, const WindowParamete
             y_coords = vaddq_f64(y_coords, center_y_v);
 
             getPixelColorArmNeon(&x_coords, &y_coords, colors);
+            // double x_coords_array[2] = {};
+            // double y_coords_array[2] = {};
+            // vst1q_f64(x_coords_array, x_coords);
+            // vst1q_f64(y_coords_array, y_coords);
+            // getPixelColorOptimized(x_coords_array, y_coords_array, colors);
             for(size_t i = 0; i < ARM_NEON_ITERATIONS_COUNT; i++) {
                 pixels_array[point_index + i].color = colors[i];
             }
