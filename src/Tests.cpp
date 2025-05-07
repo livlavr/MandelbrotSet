@@ -84,8 +84,8 @@ ErrorType parseFlags(int argc, char** argv, Mandelbrot* mandelbrot_context) {
 
     // color_printf(GREEN_COLOR, REGULAR, "[\tTEST         = %d\t]\n", mandelbrot_context->test);
     // color_printf(GREEN_COLOR, REGULAR, "[\tRUNS         = %d\t]\n", mandelbrot_context->runs);
-    color_printf(GREEN_COLOR, REGULAR, "[\tRENDER       = %d\t]\n", mandelbrot_context->render_function);
-    color_printf(GREEN_COLOR, REGULAR, "[\tUNROLL_LEVEL = %d\t]\n", UNROLL_LEVEL);
+    // color_printf(GREEN_COLOR, REGULAR, "[\tRENDER       = %d\t]\n", mandelbrot_context->render_function);
+    // color_printf(GREEN_COLOR, REGULAR, "[\tUNROLL_LEVEL = %d\t]\n", UNROLL_LEVEL);
 
     return SUCCESS;
 }

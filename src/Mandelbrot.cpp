@@ -169,50 +169,30 @@ ErrorType getPixelColorOptimized(double* x_coords, double* y_coords, sf::Color* 
 
     for(size_t i = 0; i < UNROLL_LEVEL; i++) {
         radius_vector_x_coords[i] = x_coords[i];
-    }
-    for(size_t i = 0; i < UNROLL_LEVEL; i++) {
         radius_vector_y_coords[i] = y_coords[i];
     }
 
-    while(radius_vector_test != 0 && continue_rendering) {
+    while(continue_rendering) {
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             xn[i] = radius_vector_x_coords[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             yn[i] = radius_vector_y_coords[i];
         }
 
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_x_coords[i] = xn[i] * xn[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_x_coords[i] -= yn[i] * yn[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_x_coords[i] += x_coords[i];
+            radius_vector_x_coords[i] = xn[i] * xn[i] - yn[i] * yn[i] + x_coords[i];
+            radius_vector_y_coords[i] = 2 * xn[i] * yn[i] + y_coords[i];
         }
 
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_y_coords[i] = 2 * xn[i] * yn[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_y_coords[i] += y_coords[i];
+            radius_vector_length[i] = radius_vector_x_coords[i] * radius_vector_x_coords[i] + radius_vector_y_coords[i] * radius_vector_y_coords[i];
         }
 
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_length[i] = radius_vector_x_coords[i] * radius_vector_x_coords[i];
-        }
-        for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            radius_vector_length[i] += radius_vector_y_coords[i] * radius_vector_y_coords[i];
-        }
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             radius_vector_cmps[i] = (sqrt(radius_vector_length[i]) < MAX_RADIUS);
         }
 
-        radius_vector_test = 0;
         for(size_t i = 0; i < UNROLL_LEVEL; i++) {
             if(radius_vector_cmps[i] != 0) {
-                radius_vector_test++;
                 counter[i]++;
             }
         }
@@ -223,7 +203,6 @@ ErrorType getPixelColorOptimized(double* x_coords, double* y_coords, sf::Color* 
                 continue_rendering = true;
             }
         }
-
     }
 
     for(size_t i = 0; i < UNROLL_LEVEL; i++) {
@@ -287,11 +266,6 @@ ErrorType renderMandelbrotArmNeon(sf::Vertex* pixels_array, const WindowParamete
             y_coords = vaddq_f64(y_coords, center_y_v);
 
             getPixelColorArmNeon(&x_coords, &y_coords, colors);
-            // double x_coords_array[2] = {};
-            // double y_coords_array[2] = {};
-            // vst1q_f64(x_coords_array, x_coords);
-            // vst1q_f64(y_coords_array, y_coords);
-            // getPixelColorOptimized(x_coords_array, y_coords_array, colors);
             for(size_t i = 0; i < ARM_NEON_ITERATIONS_COUNT; i++) {
                 pixels_array[point_index + i].color = colors[i];
             }
