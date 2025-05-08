@@ -20,7 +20,6 @@ ErrorType mandelbrotCtr(Mandelbrot* mandelbrot_context) {
     mandelbrot_context->y_shift          = 0;
     mandelbrot_context->scale            = 1;
     mandelbrot_context->graphics         = GRAPHICS_DEFAULT_VALUE;
-    mandelbrot_context->runs             = RUNS_DEFAULT_VALUE;
     mandelbrot_context->test             = TEST_DEFAULT_VALUE;
     mandelbrot_context->render_function  = RENDER_FUNCTION_DEFAULT_VALUE;
 
@@ -124,22 +123,6 @@ ErrorType renderMandelbrotOptimized(sf::Vertex* pixels_array, const WindowParame
                 x_coords[i] += center_x;
                 y_coords[i] += center_y;
             }
-
-            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            //     y_coords[i] = (double)(window_y + i);
-            // }
-            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            //     y_coords[i] -= half_height;
-            // }
-            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            //     y_coords[i] /= WINDOW_HEIGHT;
-            // }
-            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            //     y_coords[i] *= REAL_HEIGHT * scale;
-            // }
-            // for(size_t i = 0; i < UNROLL_LEVEL; i++) {
-            //     y_coords[i] += center_y;
-            // }
 
             getPixelColorOptimized(x_coords, y_coords, colors);
             for(size_t i = 0; i < UNROLL_LEVEL; i++) {

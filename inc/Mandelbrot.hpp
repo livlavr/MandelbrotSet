@@ -11,7 +11,6 @@
 //Flags default values:
 static const int RENDER_FUNCTION_DEFAULT_VALUE = 0;
 static const int GRAPHICS_DEFAULT_VALUE        = 1;
-static const int RUNS_DEFAULT_VALUE            = 1;
 static const int TEST_DEFAULT_VALUE            = 0;
 
 //Yes & No
@@ -25,8 +24,8 @@ static const int SIMD   = 2;
 
 //Define needs to pass this variable from environment
 static const double MAX_RADIUS                 = 3.0;
-static const int    MAX_ITERATIONS_COUNT       = 256;
-static const int    ARM_NEON_ITERATIONS_COUNT  = 2;   //Don't change, it'll kill you!
+static const int    MAX_ITERATIONS_COUNT       = 512;
+static const int    ARM_NEON_ITERATIONS_COUNT  = 2; //Don't change, it'll kill you!
 
 struct Coordinates {
     double x = 0;
@@ -38,7 +37,6 @@ struct Mandelbrot {
     double x_shift  = 0;
     double y_shift  = 0;
     double scale    = 0;
-    int    runs     = 0;
     int    test     = 0;
     int    graphics = 0;
     int    render_function = 0;

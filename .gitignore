@@ -40,3 +40,4 @@
 
 # Trash
 .DS_Store
+*.txt
